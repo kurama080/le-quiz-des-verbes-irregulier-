@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz - Verbes irréguliers</title>
+<style>
+body{font-family:Arial,sans-serif;background:#f2f2f2;margin:0;padding:18px}
+.box{max-width:620px;margin:auto;background:#fff;padding:22px;border-radius:18px;box-shadow:0 3px 12px #bbb}
+h1,h2{text-align:center}
+button{width:100%;padding:14px;margin-top:10px;font-size:17px;border:0;border-radius:9px;cursor:pointer}
+.groupGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.groupBtn{background:#e9eef7}
+.verbe{font-size:27px;font-weight:bold;text-align:center;margin:22px 0}
+input{width:100%;box-sizing:border-box;padding:13px;margin:6px 0;font-size:17px;border:1px solid #bbb;border-radius:8px}
+.score{text-align:center;font-size:19px;margin:12px 0}
+#correction{margin-top:14px;line-height:1.7}
+.hidden{display:none}
+.small{text-align:center;color:#666}
+</style>
+</head>
+<body>
+<div class="box">
+<h1>📚 Verbes irréguliers</h1>
+
+<div id="menu">
+<p class="small">Choisis le groupe à réviser :</p>
+<div class="groupGrid">
+<button class="groupBtn" onclick="start(1)">Groupe 1</button>
+<button class="groupBtn" onclick="start(2)">Groupe 2</button>
+<button class="groupBtn" onclick="start(3)">Groupe 3</button>
+<button class="groupBtn" onclick="start(4)">Groupe 4</button>
+<button class="groupBtn" onclick="start(5)">Groupe 5</button>
+</div>
+<button onclick="start(0)">🔥 Tous les groupes</button>
+</div>
+
+<div id="quiz" class="hidden">
+<div class="score" id="progress"></div>
+<div class="verbe" id="french"></div>
+<input id="a1" placeholder="1. Infinitif">
+<input id="a2" placeholder="2. Prétérit">
+<input id="a3" placeholder="3. Participe passé">
+<button id="check" onclick="checkAnswer()">Vérifier</button>
+<div id="correction"></div>
+</div>
+
+<div id="end" class="hidden">
+<h2>🏆 Terminé !</h2>
+<div class="score" id="finalScore"></div>
+<button onclick="backMenu()">Choisir un autre groupe</button>
+<button onclick="restart()">Recommencer ce groupe</button>
+</div>
+</div>
+
+<script>
+const groups={"1": [["être", "be", "was/were", "been"], ["supporter", "bear", "bore", "borne"], ["battre", "beat", "beat", "beaten"], ["devenir", "become", "became", "become"], ["commencer", "begin", "began", "begun"], ["parier", "bet", "bet", "bet"], ["mordre", "bite", "bit", "bitten"], ["souffler", "blow", "blew", "blown"], ["casser", "break", "broke", "broken"], ["apporter", "bring", "brought", "brought"], ["construire", "build", "built", "built"], ["brûler", "burn", "burnt", "burnt"], ["acheter", "buy", "bought", "bought"], ["attraper", "catch", "caught", "caught"], ["choisir", "choose", "chose", "chosen"], ["venir", "come", "came", "come"], ["coûter", "cost", "cost", "cost"], ["couper", "cut", "cut", "cut"], ["faire", "do", "did", "done"], ["rêver", "dream", "dreamt", "dreamt"]], "2": [["boire", "drink", "drank", "drunk"], ["conduire", "drive", "drove", "driven"], ["manger", "eat", "ate", "eaten"], ["tomber", "fall", "fell", "fallen"], ["se sentir / toucher", "feel", "felt", "felt"], ["se battre", "fight", "fought", "fought"], ["trouver", "find", "found", "found"], ["voler (oiseau, avion)", "fly", "flew", "flown"], ["interdire", "forbid", "forbade", "forbidden"], ["oublier", "forget", "forgot", "forgotten"], ["pardonner", "forgive", "forgave", "forgiven"], ["geler", "freeze", "froze", "frozen"], ["obtenir", "get", "got", "got"], ["donner", "give", "gave", "given"], ["aller", "go", "went", "gone"], ["croître / faire pousser", "grow", "grew", "grown"], ["avoir", "have", "had", "had"], ["entendre", "hear", "heard", "heard"], ["cacher", "hide", "hid", "hidden"], ["frapper", "hit", "hit", "hit"], ["blesser", "hurt", "hurt", "hurt"]], "3": [["garder", "keep", "kept", "kept"], ["connaître / savoir", "know", "knew", "known"], ["apprendre", "learn", "learnt", "learnt"], ["quitter / partir", "leave", "left", "left"], ["prêter", "lend", "lent", "lent"], ["laisser / louer", "let", "let", "let"], ["perdre", "lose", "lost", "lost"], ["faire / fabriquer", "make", "made", "made"], ["signifier", "mean", "meant", "meant"], ["rencontrer", "meet", "met", "met"], ["payer", "pay", "paid", "paid"], ["mettre", "put", "put", "put"], ["lire", "read", "read", "read"], ["se promener à cheval / à bicyclette", "ride", "rode", "ridden"], ["sonner", "ring", "rang", "rung"], ["courir", "run", "ran", "run"], ["dire", "say", "said", "said"], ["voir", "see", "saw", "seen"], ["vendre", "sell", "sold", "sold"], ["envoyer", "send", "sent", "sent"]], "4": [["secouer / trembler", "shake", "shook", "shaken"], ["briller", "shine", "shone", "shone"], ["tirer (arme)", "shoot", "shot", "shot"], ["montrer", "show", "showed", "shown"], ["fermer", "shut", "shut", "shut"], ["chanter", "sing", "sang", "sung"], ["être assis", "sit", "sat", "sat"], ["dormir", "sleep", "slept", "slept"], ["sentir", "smell", "smelt", "smelt"], ["parler", "speak", "spoke", "spoken"], ["dépenser", "spend", "spent", "spent"], ["se tenir debout", "stand", "stood", "stood"], ["voler (dérober)", "steal", "stole", "stolen"], ["nager", "swim", "swam", "swum"], ["prendre", "take", "took", "taken"], ["enseigner", "teach", "taught", "taught"], ["dire / raconter", "tell", "told", "told"], ["penser", "think", "thought", "thought"], ["jeter", "throw", "threw", "thrown"], ["comprendre", "understand", "understood", "understood"]], "5": [["réveiller", "wake", "woke", "woken"], ["porter (vêtement)", "wear", "wore", "worn"], ["gagner", "win", "won", "won"], ["écrire", "write", "wrote", "written"]]};
+let quiz=[], index=0, score=0, selectedGroup=0;
+
+function shuffle(a){return [...a].sort(()=>Math.random()-0.5)}
+function clean(s){return s.toLowerCase().trim().replace(/\s+/g,"")}
+
+function start(g){
+ selectedGroup=g;
+ quiz=shuffle(g===0 ? Object.values(groups).flat() : groups[g]);
+ index=0; score=0;
+ document.getElementById("menu").classList.add("hidden");
+ document.getElementById("end").classList.add("hidden");
+ document.getElementById("quiz").classList.remove("hidden");
+ showQuestion();
+}
+
+function showQuestion(){
+ const v=quiz[index];
+ document.getElementById("progress").textContent="Verbe "+(index+1)+" / "+quiz.length+" — Score : "+score;
+ document.getElementById("french").textContent=v[0];
+ ["a1","a2","a3"].forEach(id=>document.getElementById(id).value="");
+ document.getElementById("correction").innerHTML="";
+ const b=document.getElementById("check");
+ b.textContent="Vérifier"; b.onclick=checkAnswer;
+ document.getElementById("a1").focus();
+}
+
+function checkAnswer(){
+ const v=quiz[index];
+ const got=[clean(a1.value),clean(a2.value),clean(a3.value)];
+ const expected=[clean(v[1]),clean(v[2]),clean(v[3])];
+ let points=0;
+ for(let i=0;i<3;i++) if(got[i]===expected[i]) points++;
+ score+=points;
+ document.getElementById("correction").innerHTML="<b>"+points+" / 3</b><br>Réponse : <b>"+v[1]+" → "+v[2]+" → "+v[3]+"</b>";
+ const b=document.getElementById("check");
+ b.textContent=index===quiz.length-1 ? "Voir mon score" : "Verbe suivant";
+ b.onclick=nextQuestion;
+}
+
+function nextQuestion(){
+ index++;
+ if(index>=quiz.length){
+   document.getElementById("quiz").classList.add("hidden");
+   document.getElementById("end").classList.remove("hidden");
+   const total=quiz.length*3;
+   let msg=score===total?"🔥 PARFAIT !":score>=total*.8?"👏 Excellent !":score>=total*.6?"👍 Bien joué !":"💪 Continue à réviser !";
+   document.getElementById("finalScore").innerHTML="Score : <b>"+score+" / "+total+"</b><br><br>"+msg;
+ } else showQuestion();
+}
+
+function backMenu(){
+ document.getElementById("end").classList.add("hidden");
+ document.getElementById("menu").classList.remove("hidden");
+}
+function restart(){start(selectedGroup)}
+</script>
+</body>
+</html>
